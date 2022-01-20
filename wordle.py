@@ -13,13 +13,9 @@ def read():
     for line in La:
             N += 1
             if line.isalpha() and line.islower() and len(line) == 5:
-                for i, l in enumerate(line):
-                    if l in line[:i]:
-                        break
-                else:
-                    words.append(line)
-                    for j, letter in enumerate(line):
-                        counts[ord(letter) - ord('a'), j] += 1
+                words.append(line)
+                for j, letter in enumerate(line):
+                    counts[ord(letter) - ord('a'), j] += 1
 
     freq = counts / N
     return words, freq
@@ -71,17 +67,6 @@ def get_word(F, dic, stochastic=False):
                 continue
             return None
         l = chooser(0)
-        k = 0
-        while l in w and k < 25:            
-            k += 1
-            l = chooser(k)
-        if l in w:
-            j = 0
-            w = ''
-            d = dic
-            if stochastic:
-                continue
-            return None
         w += l      
         j += 1  
     return w
@@ -89,14 +74,15 @@ def get_word(F, dic, stochastic=False):
 
 def constrain(dict, exclude, fix, relocate):
     def matches(word):
+        found_fix_matches = 0
         for i, l in enumerate(word):
             # Letters we don't want
             if l in exclude:
                 return False
             # Letters we want in a specific position
             ei = fix.get(l)
-            if ei is not None and i != ei:
-                return False
+            if ei is not None and i == ei:
+                found_fix_matches += 1
             # Letters we want in a different position
             nei = relocate.get(l)
             if nei is not None and i in nei:
@@ -105,7 +91,7 @@ def constrain(dict, exclude, fix, relocate):
                 for k in req.keys():
                     if k not in word:
                         return False
-        return True
+        return found_fix_matches == len(fix)
 
     return [
         word
@@ -258,3 +244,9 @@ def test1():
 
 test1()
 
+
+#dic, F = read()
+#d2 = dic
+#d2 = constrain(dic, exclude='saincu', fix=dict(t=4, o=1), relocate=dict(r=[3]))
+#if len(d2) < 20: print(d2)
+#print(get_word(F, d2))
